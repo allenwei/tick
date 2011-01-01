@@ -78,9 +78,14 @@ describe Tick do
 end
 
 describe "A class include Tick" do
-  before do 
-    @klass = Class.new 
+  before(:each) do 
+    class TestClass;end
+    @klass = TestClass
     @klass.send(:include, Tick)
+  end
+
+  after(:each) do 
+    Object.send(:remove_const, :TestClass)
   end
 
   it "should have class method tick" do 
@@ -94,6 +99,32 @@ describe "A class include Tick" do
 
   it "should raise exception if passing wrong method name" do 
     lambda {@klass.send(:tick, :xxx)}.should raise_error
+  end
+
+  describe "tick with options" do 
+    before(:each) do 
+      @klass.class_eval do  
+        def default
+          sleep 0.5
+        end
+      end
+      @instance = @klass.new 
+      @instance.should respond_to :default
+    end
+
+    it "support customize message for each method" do 
+      message = "method default"
+      @klass.send(:tick, :default, :message => message) 
+      mock(@instance)._log_benchmark(message, anything)
+      @instance.default
+    end
+
+    it "support customize lambda message for each method" do 
+      message = "method default"
+      @klass.send(:tick, :default, :message => lambda {|class_name, method_name| "m:#{method_name}" }) 
+      mock(@instance)._log_benchmark("m:default", anything)
+      @instance.default
+    end
   end
 
   describe "tick on :default method" do 
@@ -110,7 +141,7 @@ describe "A class include Tick" do
     end
 
     it "should log time when default method be called" do 
-      mock(@instance)._log_benchmark(:default, numeric)
+      mock(@instance)._log_benchmark(Tick.desc_message.call("TestClass","default"), anything)
       @instance.default
     end
 
@@ -121,6 +152,7 @@ describe "A class include Tick" do
       @instance.default
       Tick.enabled = old_value
     end
+
   end
 
   describe "#_log_benchmark" do 
@@ -142,7 +174,7 @@ describe "A class include Tick" do
       message << "  "
       message << time
       mock(Tick.logger).debug(message)
-      @instance._log_benchmark(:default, 0.1)    
+      @instance._log_benchmark(desc, time)    
     end
 
     it "should print custom message if set custom message" do 
@@ -155,7 +187,7 @@ describe "A class include Tick" do
       message << "  "
       message << time
       mock(Tick.logger).debug(message)
-      @instance._log_benchmark(:default, 0.1)    
+      @instance._log_benchmark(desc, time)    
     end
   end
 

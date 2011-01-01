@@ -40,7 +40,7 @@ module Tick
   end
 
   def self.desc_message
-    @desc_message
+    @desc_message ||= lambda {|class_name, method_name| "TICK: method '#{method_name}' in class '#{class_name}'"}
   end
 
   def self.desc_message=(block)
@@ -58,7 +58,7 @@ module Tick
   end
 
   def self.time_message
-    @time_message
+    @time_message ||= lambda { |sec| "(#{sec.to_s} s)" }
   end
 
   def self.time_message=(block)
@@ -86,13 +86,22 @@ module Tick
 
 
   module ClassMethods 
-    def tick(method_name)
+    def tick(method_name, options = {})
       alias_method "#{method_name}_without_tick", method_name  
       define_method method_name do
         result = nil 
         if Tick.enabled 
           sec = Benchmark.realtime  { result = self.send("#{method_name}_without_tick") } 
-          _log_benchmark(method_name, sec)
+
+          desc = nil 
+          if options[:message].kind_of?(Proc) 
+            desc = options[:message].call(self.class.name, method_name)
+          else
+            desc = options[:message] || Tick.desc_message.call(self.class.name, method_name)
+          end
+
+          time = Tick.time_message.call(sec)
+          _log_benchmark(desc, time)
         else  
           result = self.send("#{method_name}_without_tick")
         end
@@ -102,9 +111,7 @@ module Tick
   end
 
   module InstanceMethods 
-    def _log_benchmark(method_name, sec)
-      desc = Tick.desc_message.nil? ? "TICK: method '#{method_name.to_s}' in class '#{self.class.name}'" : Tick.desc_message.call(self.class.name, method_name)
-      time = Tick.time_message.nil? ? "(#{sec.to_s} ms)" : Tick.time_message.call(sec)
+    def _log_benchmark(desc, time)
       message = self._colorize_desc(desc)
       message << "  "
       message << self._colorize_time(time)

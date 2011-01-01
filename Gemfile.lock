@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    tick (0.0.1)
+    tick (0.1.0)
       rainbow
 
 GEM

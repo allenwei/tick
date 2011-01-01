@@ -4,7 +4,7 @@ Tick
 About 
 ------
 
-Tick benchmark your method and print benchmark in color  
+Tick benchmark your method and print it in color  
 
 
 Installation 
@@ -19,6 +19,9 @@ Usge
     def foo 
     end 
     tick :foo  
+    tick :foo, :message => "benchmark for foo"
+    tick :foo, :message => lambda {|class_name, method_name| " #{class_name}-#{method_name}"}
+
 
 
 Configuration 
@@ -51,6 +54,7 @@ Customize messages:
     Tick.time_message = lambda { |sec| "COST (#{sec})" }
 
 Default: 
+
 * desc_message: "TICK: method '#{method_name.to_s}' in class '#{self.class.name}'" 
 * time_message: "(#{sec.to_s} ms)"
 
@@ -61,6 +65,7 @@ Set 256 color:
     Tick.time_color = "#FFC482"
 
 Default:
+
 *  desc_color: yellow 
 *  time_color: cyan
 
