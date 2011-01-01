@@ -27,6 +27,10 @@ Tick your method define method
     end 
     tick :foo  
 
+Sample output without color
+
+    TICK: method 'foo' in class 'Foo'  (0.1 s)
+
 Customize message for each method 
 
     tick :foo, :message => "benchmark for foo"

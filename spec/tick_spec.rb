@@ -168,7 +168,7 @@ describe "A class include Tick" do
 
     it "log sec in color" do 
       desc = "TICK: method 'default' in class ''"
-      time = "(0.1 ms)"
+      time = "(0.1 s)"
       message = ""
       message << desc
       message << "  "
