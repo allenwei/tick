@@ -1,0 +1,11 @@
+--colour
+--format
+document
+--loadby
+mtime
+--reverse
+--timeout
+20
+--diff
+--backtrace
+
