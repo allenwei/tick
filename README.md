@@ -15,10 +15,20 @@ Installation
 
 Usge 
 --------
+include Tick 
 
+    class Foo 
+      include Tick 
+    end
+
+Tick your method define method 
+  
     def foo 
     end 
     tick :foo  
+
+Customize message for each method 
+
     tick :foo, :message => "benchmark for foo"
     tick :foo, :message => lambda {|class_name, method_name| " #{class_name}-#{method_name}"}
 
