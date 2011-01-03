@@ -44,6 +44,7 @@ describe Tick do
     Tick.enabled.should be false
   end
 
+
   it "can set custom desc color" do 
     Tick.desc_color = "#FFC482" 
     Tick.desc_color.should == "#FFC482"
@@ -101,6 +102,17 @@ describe "A class include Tick" do
     lambda {@klass.send(:tick, :xxx)}.should raise_error
   end
 
+  it "do not rewrite method if turn of tick" do 
+    Tick.enabled = false 
+    @klass.class_eval do  
+      def default
+        sleep 0.5
+      end
+    end
+    @klass.send(:tick, :default) 
+    @klass.new.should_not respond_to :default_without_tick  
+  end
+
   describe "tick with options" do 
     before(:each) do 
       @klass.class_eval do  
@@ -144,15 +156,6 @@ describe "A class include Tick" do
       mock(@instance)._log_benchmark(Tick.desc_message.call("TestClass","default"), anything)
       @instance.default
     end
-
-    it "should not do benchmark if Tick is turn off" do 
-      dont_allow(Benchmark).realtime(anything)
-      old_value = Tick.enabled
-      Tick.enabled = false
-      @instance.default
-      Tick.enabled = old_value
-    end
-
   end
 
   describe "#_log_benchmark" do 

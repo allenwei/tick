@@ -87,10 +87,10 @@ module Tick
 
   module ClassMethods 
     def tick(method_name, options = {})
-      alias_method "#{method_name}_without_tick", method_name  
-      define_method method_name do
-        result = nil 
-        if Tick.enabled 
+      if Tick.enabled
+        alias_method "#{method_name}_without_tick", method_name  
+        define_method method_name do
+          result = nil 
           sec = Benchmark.realtime  { result = self.send("#{method_name}_without_tick") } 
 
           desc = nil 
@@ -102,10 +102,8 @@ module Tick
 
           time = Tick.time_message.call(sec)
           _log_benchmark(desc, time)
-        else  
-          result = self.send("#{method_name}_without_tick")
+          result
         end
-        result
       end
     end
   end
