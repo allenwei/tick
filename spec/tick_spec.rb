@@ -156,6 +156,15 @@ describe "A class include Tick" do
       mock(@instance)._log_benchmark(Tick.desc_message.call("TestClass","default"), anything)
       @instance.default
     end
+
+    it "should not do benchmark if Tick is turn off at runtime" do 
+      dont_allow(Benchmark).realtime(anything)
+      old_value = Tick.enabled
+      Tick.enabled = false
+      @instance.default
+      Tick.enabled = old_value
+    end
+
   end
 
   describe "#_log_benchmark" do 

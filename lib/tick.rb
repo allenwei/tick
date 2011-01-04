@@ -91,17 +91,21 @@ module Tick
         alias_method "#{method_name}_without_tick", method_name  
         define_method method_name do
           result = nil 
-          sec = Benchmark.realtime  { result = self.send("#{method_name}_without_tick") } 
+          if Tick.enabled #user may turn off tick at runtime
+            sec = Benchmark.realtime  { result = self.send("#{method_name}_without_tick") } 
+            desc = nil 
+            if options[:message].kind_of?(Proc) 
+              desc = options[:message].call(self.class.name, method_name)
+            else
+              desc = options[:message] || Tick.desc_message.call(self.class.name, method_name)
+            end
 
-          desc = nil 
-          if options[:message].kind_of?(Proc) 
-            desc = options[:message].call(self.class.name, method_name)
-          else
-            desc = options[:message] || Tick.desc_message.call(self.class.name, method_name)
+            time = Tick.time_message.call(sec)
+            _log_benchmark(desc, time)
+          else  
+            result = self.send("#{method_name}_without_tick")
           end
-
-          time = Tick.time_message.call(sec)
-          _log_benchmark(desc, time)
+          
           result
         end
       end
